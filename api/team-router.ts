@@ -7,23 +7,21 @@ import { eq, desc, asc, like, and } from "drizzle-orm";
 export const teamRouter = createRouter({
   list: publicQuery
     .input(
-      z.object({
-        tier: z.enum(["1", "2", "3"]).optional(),
-        search: z.string().optional(),
-        sortBy: z.enum(["points", "name", "worldRank"]).default("points"),
-        sortOrder: z.enum(["asc", "desc"]).default("desc"),
-      }).optional()
+      z
+        .object({
+          tier: z.enum(["1", "2", "3"]).optional(),
+          search: z.string().optional(),
+          sortBy: z.enum(["points", "name", "worldRank"]).default("points"),
+          sortOrder: z.enum(["asc", "desc"]).default("desc"),
+        })
+        .optional(),
     )
     .query(async ({ input }) => {
       const db = getDb();
       const conditions = [];
 
-      if (input?.tier) {
-        conditions.push(eq(teams.tier, input.tier));
-      }
-      if (input?.search) {
-        conditions.push(like(teams.name, `%${input.search}%`));
-      }
+      if (input?.tier) conditions.push(eq(teams.tier, input.tier));
+      if (input?.search) conditions.push(like(teams.name, `%${input.search}%`));
 
       const where = conditions.length > 0 ? and(...conditions) : undefined;
 
@@ -31,8 +29,8 @@ export const teamRouter = createRouter({
         input?.sortBy === "name"
           ? teams.name
           : input?.sortBy === "worldRank"
-          ? teams.worldRank
-          : teams.points;
+            ? teams.worldRank
+            : teams.points;
 
       const orderFn = input?.sortOrder === "asc" ? asc : desc;
 
@@ -43,17 +41,11 @@ export const teamRouter = createRouter({
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
       const db = getDb();
-      const [team] = await db
-        .select()
-        .from(teams)
-        .where(eq(teams.id, input.id));
 
+      const [team] = await db.select().from(teams).where(eq(teams.id, input.id));
       if (!team) return null;
 
-      const teamPlayers = await db
-        .select()
-        .from(players)
-        .where(eq(players.teamId, input.id));
+      const teamPlayers = await db.select().from(players).where(eq(players.teamId, input.id));
 
       return { ...team, players: teamPlayers };
     }),
@@ -70,12 +62,17 @@ export const teamRouter = createRouter({
         worldRank: z.number().optional(),
         coach: z.string().optional(),
         country: z.string().optional(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const db = getDb();
-      const [result] = await db.insert(teams).values(input);
-      return { id: Number(result.insertId) };
+
+      const [createdTeam] = await db
+        .insert(teams)
+        .values(input)
+        .returning({ id: teams.id });
+
+      return { id: createdTeam.id };
     }),
 
   update: publicQuery
@@ -91,12 +88,14 @@ export const teamRouter = createRouter({
         worldRank: z.number().optional(),
         coach: z.string().optional(),
         country: z.string().optional(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const db = getDb();
       const { id, ...data } = input;
+
       await db.update(teams).set(data).where(eq(teams.id, id));
+
       return { success: true };
     }),
 
@@ -104,7 +103,9 @@ export const teamRouter = createRouter({
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       const db = getDb();
+
       await db.delete(teams).where(eq(teams.id, input.id));
+
       return { success: true };
     }),
 });
