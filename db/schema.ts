@@ -10,7 +10,7 @@ import {
   float,
   date,
   time,
-} from "drizzle-orm/mysql-core";
+} from "drizzle-orm/pg-core";
 
 export const users = mysqlTable("users", {
   id: serial("id").primaryKey(),
