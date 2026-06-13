@@ -78,10 +78,14 @@ const userId = createdUser.id;
       const db = getDb();
 
       const [user] = await db
-        .select()
-        .from(localUsers)
-        .where(eq(localUsers.username, input.username));
-
+  .select({
+    id: localUsers.id,
+    username: localUsers.username,
+    password: localUsers.password,
+    role: localUsers.role,
+  })
+  .from(localUsers)
+  .where(eq(localUsers.username, input.username));
       if (!user) {
         throw new Error("Invalid username or password");
       }
