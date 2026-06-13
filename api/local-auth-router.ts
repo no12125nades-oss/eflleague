@@ -107,9 +107,14 @@ const userId = createdUser.id;
 
     const db = getDb();
     const [user] = await db
-      .select()
-      .from(localUsers)
-      .where(eq(localUsers.id, payload.userId));
+  .select({
+    id: localUsers.id,
+    username: localUsers.username,
+    password: localUsers.password,
+    role: localUsers.role,
+  })
+  .from(localUsers)
+  .where(eq(localUsers.username, input.username));
 
     if (!user) return null;
 
