@@ -7,31 +7,25 @@ import { eq, desc, asc, like, and } from "drizzle-orm";
 export const playerRouter = createRouter({
   list: publicQuery
     .input(
-      z.object({
-        tier: z.enum(["1", "2", "3"]).optional(),
-        role: z.enum(["awper", "entry", "igl", "lurk", "support"]).optional(),
-        teamId: z.number().optional(),
-        search: z.string().optional(),
-        sortBy: z.enum(["name", "nickname", "statsKd", "statsRating"]).default("statsRating"),
-        sortOrder: z.enum(["asc", "desc"]).default("desc"),
-      }).optional()
+      z
+        .object({
+          tier: z.enum(["1", "2", "3"]).optional(),
+          role: z.enum(["awper", "entry", "igl", "lurk", "support"]).optional(),
+          teamId: z.number().optional(),
+          search: z.string().optional(),
+          sortBy: z.enum(["name", "nickname", "statsKd", "statsRating"]).default("statsRating"),
+          sortOrder: z.enum(["asc", "desc"]).default("desc"),
+        })
+        .optional(),
     )
     .query(async ({ input }) => {
       const db = getDb();
       const conditions = [];
 
-      if (input?.tier) {
-        conditions.push(eq(players.tier, input.tier));
-      }
-      if (input?.role) {
-        conditions.push(eq(players.role, input.role));
-      }
-      if (input?.teamId) {
-        conditions.push(eq(players.teamId, input.teamId));
-      }
-      if (input?.search) {
-        conditions.push(like(players.nickname, `%${input.search}%`));
-      }
+      if (input?.tier) conditions.push(eq(players.tier, input.tier));
+      if (input?.role) conditions.push(eq(players.role, input.role));
+      if (input?.teamId) conditions.push(eq(players.teamId, input.teamId));
+      if (input?.search) conditions.push(like(players.nickname, `%${input.search}%`));
 
       const where = conditions.length > 0 ? and(...conditions) : undefined;
 
@@ -39,10 +33,10 @@ export const playerRouter = createRouter({
         input?.sortBy === "name"
           ? players.name
           : input?.sortBy === "nickname"
-          ? players.nickname
-          : input?.sortBy === "statsKd"
-          ? players.statsKd
-          : players.statsRating;
+            ? players.nickname
+            : input?.sortBy === "statsKd"
+              ? players.statsKd
+              : players.statsRating;
 
       const orderFn = input?.sortOrder === "asc" ? asc : desc;
 
@@ -62,28 +56,21 @@ export const playerRouter = createRouter({
       }));
     }),
 
-  getById: publicQuery
-    .input(z.object({ id: z.number() }))
-    .query(async ({ input }) => {
-      const db = getDb();
-      const [player] = await db
-        .select()
-        .from(players)
-        .where(eq(players.id, input.id));
+  getById: publicQuery.input(z.object({ id: z.number() })).query(async ({ input }) => {
+    const db = getDb();
 
-      if (!player) return null;
+    const [player] = await db.select().from(players).where(eq(players.id, input.id));
+    if (!player) return null;
 
-      let teamName = null;
-      if (player.teamId) {
-        const [team] = await db
-          .select()
-          .from(teams)
-          .where(eq(teams.id, player.teamId));
-        teamName = team?.name ?? null;
-      }
+    let teamName = null;
 
-      return { ...player, teamName };
-    }),
+    if (player.teamId) {
+      const [team] = await db.select().from(teams).where(eq(teams.id, player.teamId));
+      teamName = team?.name ?? null;
+    }
+
+    return { ...player, teamName };
+  }),
 
   create: publicQuery
     .input(
@@ -98,12 +85,17 @@ export const playerRouter = createRouter({
         statsRating: z.number().optional(),
         statsMaps: z.number().optional(),
         country: z.string().optional(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const db = getDb();
-      const [result] = await db.insert(players).values(input);
-      return { id: Number(result.insertId) };
+
+      const [createdPlayer] = await db
+        .insert(players)
+        .values(input)
+        .returning({ id: players.id });
+
+      return { id: createdPlayer.id };
     }),
 
   update: publicQuery
@@ -120,20 +112,22 @@ export const playerRouter = createRouter({
         statsRating: z.number().optional(),
         statsMaps: z.number().optional(),
         country: z.string().optional(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const db = getDb();
       const { id, ...data } = input;
+
       await db.update(players).set(data).where(eq(players.id, id));
+
       return { success: true };
     }),
 
-  delete: publicQuery
-    .input(z.object({ id: z.number() }))
-    .mutation(async ({ input }) => {
-      const db = getDb();
-      await db.delete(players).where(eq(players.id, input.id));
-      return { success: true };
-    }),
+  delete: publicQuery.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+    const db = getDb();
+
+    await db.delete(players).where(eq(players.id, input.id));
+
+    return { success: true };
+  }),
 });
