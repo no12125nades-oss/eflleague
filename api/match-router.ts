@@ -115,8 +115,12 @@ export const matchRouter = createRouter({
       if (input.matchDate) data.matchDate = input.matchDate;
       if (input.matchTime) data.matchTime = input.matchTime;
 
-      const [result] = await db.insert(matches).values(data as typeof matches.$inferInsert);
-      return { id: Number(result.insertId) };
+      const [createdMatch] = await db
+  .insert(matches)
+  .values(data as typeof matches.$inferInsert)
+  .returning({ id: matches.id });
+
+return { id: createdMatch.id };
     }),
 
   update: publicQuery
