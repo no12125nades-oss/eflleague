@@ -51,14 +51,17 @@ export const localAuthRouter = createRouter({
 
       const hashedPassword = await bcrypt.hash(input.password, 10);
 
-      const [result] = await db.insert(localUsers).values({
-        username: input.username,
-        password: hashedPassword,
-        displayName: input.displayName || input.username,
-        email: input.email,
-      });
+      const [createdUser] = await db
+  .insert(localUsers)
+  .values({
+    username: input.username,
+    password: hashedPassword,
+    displayName: input.displayName || input.username,
+    email: input.email,
+  })
+  .returning({ id: localUsers.id });
 
-      const userId = Number(result.insertId);
+const userId = createdUser.id;
       const token = await createToken(userId, "user");
 
       return { token, userId };
