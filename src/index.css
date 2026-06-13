@@ -1,0 +1,165 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=Space+Grotesk:wght@300;400;500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --dark: #0c0d0e;
+    --light: #f5f5f5;
+    --grey: #5f5f5f;
+    --black: #1a1a1a;
+    --accent-cyan: #00e5ff;
+    --accent-magenta: #ff00aa;
+    --accent-green: #00ff88;
+    --glow-cyan: 0 0 20px rgba(0,229,255,0.4);
+    --glow-magenta: 0 0 20px rgba(255,0,170,0.4);
+    --container-padding: 3rem;
+    --section-gap: 8rem;
+    --border-radius: 1.5rem;
+    --card-padding: 2rem;
+
+    --background: 0 0% 5%;
+    --foreground: 0 0% 96%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 96%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 96%;
+    --primary: 187 100% 50%;
+    --primary-foreground: 0 0% 5%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 96%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 96%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 96%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 187 100% 50%;
+    --radius: 0.5rem;
+  }
+
+  .light {
+    --background: 0 0% 96%;
+    --foreground: 0 0% 5%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 5%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 5%;
+    --primary: 187 100% 50%;
+    --primary-foreground: 0 0% 5%;
+    --secondary: 0 0% 90%;
+    --secondary-foreground: 0 0% 5%;
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 0 0% 90%;
+    --accent-foreground: 0 0% 5%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 96%;
+    --border: 0 0% 80%;
+    --input: 0 0% 80%;
+    --ring: 187 100% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-[var(--dark)] text-[var(--light)];
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 300;
+    line-height: 1.6;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'VT323', monospace;
+    font-weight: 400;
+  }
+}
+
+@layer components {
+  .font-display {
+    font-family: 'VT323', monospace;
+  }
+  .font-body {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .glow-cyan {
+    box-shadow: var(--glow-cyan);
+  }
+  .glow-magenta {
+    box-shadow: var(--glow-magenta);
+  }
+  .border-dashed-grey {
+    border: 1px dashed var(--grey);
+  }
+  .tier-badge-1 {
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+  }
+  .tier-badge-2 {
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+  }
+  .tier-badge-3 {
+    border-color: var(--accent-magenta);
+    color: var(--accent-magenta);
+  }
+  .status-upcoming {
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+  }
+  .status-ongoing {
+    background: var(--accent-magenta);
+    color: var(--dark);
+  }
+  .status-finished {
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--grey);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-cyan);
+}
+
+/* Animations */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(255,0,170,0.4); }
+  50% { box-shadow: 0 0 20px rgba(255,0,170,0.8); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease forwards;
+}
